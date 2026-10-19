@@ -19,13 +19,13 @@ import types
 
 import kociemba
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'docs' / 'images'
 COLORS = {
-    'b': '#368ee8', 'r': '#eb535a', 'g': '#2cbd8c',
-    'o': '#fb9349', 'w': '#ecf2f8', 'y': '#ffd35b',
+    'b': '#0055cc', 'r': '#dd2020', 'g': '#009b48',
+    'o': '#ff8800', 'w': '#ffffff', 'y': '#ffdd00',
 }
 SIDES = ['L', 'F', 'R', 'B', 'D', 'U']
 AXES = {
@@ -234,13 +234,6 @@ def verified_solve():
     return states, solution
 
 
-def shadow(image, bounds):
-    overlay = Image.new('RGBA', image.size)
-    ImageDraw.Draw(overlay).ellipse(bounds, fill=(0, 0, 0, 150))
-    overlay = overlay.filter(ImageFilter.GaussianBlur(24))
-    return Image.alpha_composite(image.convert('RGBA'), overlay).convert('RGB')
-
-
 def motor_mesh(center, axis):
     # Generic illustrative motor, not a claim about the project's exact model.
     axis = np.array(axis, dtype=float)
@@ -261,34 +254,29 @@ def motor_mesh(center, axis):
 
 
 def hero(state):
-    image = background(1600, 900)
-    image = shadow(image, (710, 650, 1490, 810))
-    polygons = stl('base_plate.stl', '#2d829b')
+    width, height, supersampling = 1000, 850, 2
+    image = Image.new('RGB', (width*supersampling, height*supersampling), '#eeeeee')
+    polygons = stl('base_plate.stl', '#a5a5a5')
     # Inferred concept layout: use actual meshes, showing the top access open.
     for i in range(4):
         matrix = rotation([0., 1, 0], i*math.pi/2)
         offset = np.array([0, 49, 61]) @ matrix.T
         name = 'stepper_motor_mount_' + ('a' if i % 2 == 0 else 'b') + '+(x2).stl'
-        polygons += stl(name, '#3a9db1', matrix, offset)
+        polygons += stl(name, '#b0b0b0', matrix, offset)
         motor_center = np.array([0, 104, 67]) @ matrix.T
         axis = np.array([0, 0, -1]) @ matrix.T
         polygons += motor_mesh(motor_center, axis)
     polygons += motor_mesh([0, 34, 0], [0, 1, 0])
     polygons += cube_mesh(state, np.array([0., 104, 0]), 18)
-    image = rasterize(image, polygons, (1150, 690), 3.25, camera=(8, 6, 10))
-    draw = ImageDraw.Draw(image)
-    draw.text((78, 75), 'A BROTHERS’ BUILD  /  2024', font=font(18, mono=True), fill='#6fd4da')
-    draw.text((72, 160), 'Rubik’s cube', font=font(76, True), fill='#f1f5fa')
-    draw.text((72, 248), 'robot.', font=font(102, True), fill='#f1f5fa')
-    draw.text((78, 404), 'Five driven faces.', font=font(32), fill='#b4c8d8')
-    draw.text((78, 451), 'One clever workaround.', font=font(32), fill='#b4c8d8')
-    draw.line((80, 543, 500, 543), fill='#31465a', width=2)
-    draw.text((78, 577), 'PYTHON  →  SERIAL  →  ARDUINO', font=font(19, mono=True), fill='#76d4db')
-    draw.text((78, 620), 'Kociemba solving · stepper control', font=font(21), fill='#9bafc2')
-    draw.rounded_rectangle((78, 748, 341, 792), radius=22, fill='#243c4c')
-    draw.text((98, 758), 'ILLUSTRATIVE CAD RENDER', font=font(14, mono=True), fill='#bbdce6')
-    draw.text((78, 838), 'Existing printed-part meshes · inferred assembly · generic motor bodies',
-              font=font(16), fill='#8c9eb2')
+    camera = np.array([8., 6, 10]); camera /= np.linalg.norm(camera)
+    right = np.cross([0., 1, 0], camera); right /= np.linalg.norm(right)
+    up = np.cross(camera, right)
+    projected = np.concatenate([v for v, _ in polygons]) @ np.stack([right, -up]).T
+    low, high = projected.min(0), projected.max(0)
+    scale = min((width-120)/(high[0]-low[0]), (height-100)/(high[1]-low[1]))
+    center = np.array([width/2, height/2]) - (low+high)/2*scale
+    image = rasterize(image, polygons, center*supersampling, scale*supersampling, camera)
+    image = image.resize((width, height), Image.Resampling.LANCZOS)
     image.save(OUT / 'robot-concept.png', optimize=True)
 
 
@@ -331,37 +319,23 @@ def parts_gallery():
 
 
 def solve_animation(states, solution):
-    width, height = 1000, 660
-    base = shadow(background(width, height), (450, 482, 930, 598))
+    width, height, supersampling = 640, 640, 2
+    base = Image.new('RGB', (width*supersampling, height*supersampling), '#eeeeee')
     frames, durations = [], []
 
-    def frame(state, index, move=None, progress=0):
+    def frame(state, move=None, progress=0):
         image = rasterize(base, cube_mesh(state, turn=move, progress=progress),
-                          (700, 325), 103, camera=(7, 5, 9))
-        draw = ImageDraw.Draw(image)
-        draw.text((43, 42), 'SOLVE / SIMULATION', font=font(15, mono=True), fill='#71cfd7')
-        draw.text((40, 111), 'From scramble', font=font(33, True), fill='#ecf3fa')
-        draw.text((40, 153), 'to solved.', font=font(43, True), fill='#ecf3fa')
-        draw.text((43, 239), 'Kociemba’s two-phase solver', font=font(17), fill='#b5c8d9')
-        draw.text((43, 270), 'Verified with this repo’s cube model', font=font(15), fill='#94aabe')
-        draw.text((43, 359), f'{index:02d} / {len(solution):02d}', font=font(37, mono=True), fill='#79d3db')
-        label = 'SOLVED' if index == len(solution) else f'MOVE  {move or solution[0]}'
-        draw.text((43, 421), label, font=font(27, True), fill='#eff4f9')
-        draw.rounded_rectangle((44, 494, 356, 500), radius=3, fill='#2b3e50')
-        if index:
-            draw.rounded_rectangle((44, 494, 44+312*index/len(solution), 500), radius=3, fill='#66cbd0')
-        draw.text((43, 588), 'SOFTWARE ANIMATION · ILLUSTRATIVE TIMING',
-                  font=font(12, mono=True), fill='#8ea6ba')
-        return image
+                          (width/2*supersampling, height/2*supersampling),
+                          112*supersampling, camera=(7, 5, 9))
+        return image.resize((width, height), Image.Resampling.LANCZOS)
 
-    frames.append(frame(states[0], 0)); durations.append(900)
+    frames.append(frame(states[0])); durations.append(900)
     for index, move in enumerate(solution):
         for step in range(1, 9):
             t = step / 8
             eased = t*t*(3-2*t)
-            frames.append(frame(states[index], index, move, eased)); durations.append(70)
-        frames.append(frame(states[index+1], index+1,
-                            solution[index+1] if index+1 < len(solution) else None))
+            frames.append(frame(states[index], move, eased)); durations.append(70)
+        frames.append(frame(states[index+1]))
         durations.append(160)
     frames[-1].save(OUT / 'solved-preview.png', optimize=True)
     durations[-1] = 2400

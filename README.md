@@ -4,7 +4,7 @@
 
 ![Illustrative CAD reconstruction of the five-drive cube robot](docs/images/robot-concept.png)
 
-*Rendered from the included printed-part meshes with an inferred assembly and generic motor bodies. Colors and arrangement are illustrative; this is not a photograph or an exact record of the physical build.*
+*Plain CAD render from the included printed-part meshes. Assembly placement and motor bodies are approximate; this is not a photograph of the build.*
 
 My brother found the existing mechanical design, and we built the robot together. I wrote the Arduino stepper-control firmware and adapted the Python software for our hardware. The Python GUI and cube code build on earlier work credited to Kenneth Hung; the solving algorithm comes from the `kociemba` library. The mechanical design and the underlying solving algorithm are credited to their original creators below.
 

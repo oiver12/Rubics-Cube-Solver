@@ -4,9 +4,9 @@ The README uses generated renders because no photos or recordings of the physica
 
 | File | Content |
 | --- | --- |
-| `robot-concept.png` | Illustrative robot layout using the included meshes, an inferred assembly, and generic motor bodies; 1600 × 900 |
+| `robot-concept.png` | Plain CAD render on a flat gray background, using the included meshes, an inferred assembly, and generic motor bodies; 1000 × 850 |
 | `cad-parts.png` | Six individual existing STL meshes; 1600 × 1050 |
-| `solve-simulation.gif` | Smooth cube-only software solve using `kociemba` and the repository's cube model; 1000 × 660 |
+| `solve-simulation.gif` | Plain cube-only software solve on a flat gray background, using `kociemba` and the repository's cube model; 640 × 640 |
 | `solved-preview.png` | Final solved frame of the animation |
 | `solve-sequence.json` | Reproducible scramble, facelets, solution, and solved-state verification |
 
