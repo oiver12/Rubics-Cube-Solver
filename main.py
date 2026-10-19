@@ -1,8 +1,8 @@
 # 
 # Author: Kenneth Hung
-# This program will solve the cube using an optimized F2L algorithm ONLY GRAPHICALLY, no arduino!
-# This is the file that runs the solver, and displays the cube graphically using PyGame
-# Run this file for graphical solve w/o arduino
+# Adapted for this project's Arduino stepper-motor robot; see README.md for credits.
+# Uses the kociemba library and displays the cube using Pygame.
+# Hardware commands are enabled by default in motor.py.
 #
 
 

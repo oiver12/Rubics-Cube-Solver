@@ -1,0 +1,8 @@
+{
+  "scramble": "R U F2 L D' B R2 U' F L2 D B2",
+  "facelets_URFDLB": "UUDFUDLFLBFFBRBURFDUULFLFURRRBLDDBDRFRBLLURDDLBLRBFUBD",
+  "solution": "F' L' U D2 R' F' L F' L' U F L2 D2 F2 D' B2 L2 U B2 D2",
+  "face_turns": 20,
+  "verified_solved": true,
+  "note": "Software simulation; animation timing is illustrative."
+}

@@ -1,0 +1,2 @@
+# Keep printable CAD assets out of GitHub's source-language statistics.
+STL_files/** linguist-vendored

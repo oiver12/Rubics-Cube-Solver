@@ -1,0 +1,22 @@
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Local editor, operating-system, and build output
+.DS_Store
+Thumbs.db
+build/
+dist/
+
+# Local environment settings
+.env
+.env.*
+!.env.example
+
+# Slice the mechanical models for your own printer instead of committing G-code
+G_Code/
+*.gcode
+*.gco
